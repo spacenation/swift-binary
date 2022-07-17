@@ -9,7 +9,7 @@ let package = Package(
         .library(name: "Binary", targets: ["Binary"]),
     ],
     dependencies: [
-        .package(name: "List", url: "git@github.com:spacenation/swift-list.git", .upToNextMajor(from: "0.3.3")),
+        .package(name: "List", url: "git@github.com:spacenation/swift-list.git", .upToNextMajor(from: "1.0.0")),
     ],
     targets: [
         .target(name: "Binary", dependencies: ["List"]),
