@@ -43,17 +43,42 @@ public struct BitArray {
     }
     
     public init(bools: [Bool]) {
-        self = bools.reduce(.empty, +)
+        self.bytes = boolsToBytes(bools: bools)
+        self.length = bools.count
     }
     
     public var asUInt8: UInt8 {
         bytes.first!
     }
     
+    public var asUInt64s: [UInt64] {
+        var result = [UInt64]()
+        for i in stride(from: 0, to: bytes.count, by: 8) {
+            let endIndex = i+8 <= bytes.count ? i+8 : bytes.count
+            var uInt64: UInt64 = 0
+            for j in i..<endIndex {
+                uInt64 |= UInt64(bytes[j]) << ((j - i) * 8)
+            }
+            result.append(uInt64)
+        }
+        return result
+    }
+    
     public subscript(safe index: Int) -> Bool? {
         guard index >= 0, index < length else { return nil }
-        let bitIndex = index % 8
-        let byteIndex = index / 8
+
+        let bitsInFirstByte = length % 8
+        var byteIndex: Int
+        var bitIndex: Int
+
+        if bitsInFirstByte == 0 || index >= bitsInFirstByte {
+            byteIndex = index / 8
+            bitIndex = index % 8
+        } else {
+            byteIndex = (index + 8 - bitsInFirstByte) / 8
+            bitIndex = (index + 8 - bitsInFirstByte) % 8
+        }
+
         let byte = bytes[byteIndex]
         let int = byte >> (8 - (bitIndex + 1)) & 0x0001
         return int == 0 ? false : true
